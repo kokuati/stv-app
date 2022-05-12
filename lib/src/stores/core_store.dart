@@ -67,8 +67,8 @@ class CoreStore {
     final List videoList = terminalModel.plalist;
     final List<String> resultList = [];
     for (var video in videoList) {
-      final bool _videoExist = await File("$_videoPath/$video.mp4").exists();
-      if (_videoExist) {
+      final bool videoExist = await File("$_videoPath/$video.mp4").exists();
+      if (videoExist) {
         resultList.add(video);
       }
     }

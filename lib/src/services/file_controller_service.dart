@@ -14,34 +14,34 @@ class FileControllerService {
   }
 
   Future<String> getVideoPath() async {
-    final String _getPath = await getPath();
-    return '$_getPath$videoPath';
+    final String path = await getPath();
+    return '$path$videoPath';
   }
 
   Future<void> createVideoFromBase64(String fileName, String base64) async {
-    final String _getPath = await getPath();
-    final Directory _videoPath = Directory('$_getPath$videoPath');
-    final bool _videoPathExist = await _videoPath.exists();
-    if (!_videoPathExist) {
-      await _videoPath.create();
+    final String path = await getPath();
+    final Directory videoDirectory = Directory('$path$videoPath');
+    final bool videoPathExist = await videoDirectory.exists();
+    if (!videoPathExist) {
+      await videoDirectory.create();
     }
     final decodedBytes = base64Decode(base64);
-    var fileVideo = File("$_getPath$videoPath/$fileName");
+    var fileVideo = File("$path$videoPath/$fileName");
     await fileVideo.writeAsBytes(decodedBytes);
   }
 
   Future<void> deleteVideo(String fileName) async {
-    final String _getPath = await getPath();
-    File file = File('$_getPath$videoPath/$fileName');
+    final String path = await getPath();
+    File file = File('$path$videoPath/$fileName');
     file.delete();
   }
 
   Future<void> deleteVideoDirectory() async {
-    final String _getPath = await getPath();
-    final Directory _videoPath = Directory('$_getPath$videoPath');
-    final bool _videoPathExist = await _videoPath.exists();
-    if (_videoPathExist) {
-      _videoPath.deleteSync(recursive: true);
+    final String path = await getPath();
+    final Directory videoDirectory = Directory('$path$videoPath');
+    final bool videoPathExist = await videoDirectory.exists();
+    if (videoPathExist) {
+      videoDirectory.deleteSync(recursive: true);
     }
   }
 }

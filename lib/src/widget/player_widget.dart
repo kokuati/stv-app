@@ -12,10 +12,10 @@ class PlayerWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _PlayerWidgetState createState() => _PlayerWidgetState();
+  PlayerWidgetState createState() => PlayerWidgetState();
 }
 
-class _PlayerWidgetState extends State<PlayerWidget> {
+class PlayerWidgetState extends State<PlayerWidget> {
   late VideoPlayerController controller;
 
   @override
