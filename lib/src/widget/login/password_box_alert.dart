@@ -25,7 +25,7 @@ class PasswordBoxAlert extends StatelessWidget {
             width: 15,
           ),
           Text(
-            'E-Mail / Senha inválidos',
+            'Terminal inválido',
             style: TextStyle(
               inherit: false,
               color: const Color.fromARGB(255, 89, 0, 0),

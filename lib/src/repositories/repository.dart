@@ -81,7 +81,7 @@ class Repository extends IRepository {
       for (var item in getData["data"]["playlists"][0]["contents"]) {
         videoList.add(item);
       }
-      print('add na api  barra, lat  e lon');
+      //print('add na api  barra, lat  e lon');
       final TerminalModel result = TerminalModel(
         id: terminal,
         plalist: videoList,
