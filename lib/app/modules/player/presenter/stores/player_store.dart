@@ -5,6 +5,7 @@ import 'package:saudetv/app/modules/player/domain/entities/contents_entity.dart'
 import 'package:saudetv/app/modules/player/domain/entities/weather_entity.dart';
 import 'package:saudetv/app/modules/player/domain/usecases/delete_contents.dart';
 import 'package:saudetv/app/modules/player/domain/usecases/get_contents.dart';
+import 'package:saudetv/app/modules/player/domain/usecases/get_weather.dart';
 import 'package:saudetv/app/modules/player/domain/usecases/update_terminal.dart';
 import 'package:saudetv/app/modules/player/presenter/page/contents_pages/circular_pregress_page.dart';
 import 'package:saudetv/app/modules/player/presenter/page/contents_pages/others_page.dart';
@@ -14,12 +15,14 @@ import 'package:intl/intl.dart';
 
 class PlayerStore {
   final IGetContents getContents;
+  final IGetWeather getWeather;
   final IUpdateTerminal updateTerminal;
   final IDeleteContents deleteContents;
   final PageStore pageStore;
 
   PlayerStore({
     required this.getContents,
+    required this.getWeather,
     required this.updateTerminal,
     required this.deleteContents,
     required this.pageStore,
@@ -28,9 +31,9 @@ class PlayerStore {
   ValueNotifier<Widget> contentsPage =
       ValueNotifier(const CircularProgressPage());
   ValueNotifier<bool> hasBar = ValueNotifier(true);
+  ValueNotifier<WeatherEntity> weatherEntity =
+      ValueNotifier(WeatherEntity(id: 0, icon: '', tempMin: '', tempMax: ''));
   late LoginSource _loginSource;
-  WeatherEntity _weatherEntity =
-      WeatherEntity(id: 0, icon: '', tempMin: '', tempMax: '');
   List<ContentsEntity> _contentsList = [];
   final List<String> _deleteContentsList = [];
   int _contentsIndex = 0;
@@ -39,7 +42,6 @@ class PlayerStore {
   bool _isDelete = false;
 
   LoginSource get loginSource => _loginSource;
-  WeatherEntity get weatherEntity => _weatherEntity;
   List<ContentsEntity> get contentsList => _contentsList;
   List<String> get deleteContentsList => _deleteContentsList;
   bool get lateUpDate => _lateUpDate;
@@ -48,18 +50,16 @@ class PlayerStore {
     _loginSource = loginSource;
   }
 
-  void setWeatherEntity(WeatherEntity weatherEntity) {
-    weatherEntity = _weatherEntity;
-  }
-
   Future<void> setContentsPage(ContentsEntity contentsEntity) async {
     if (contentsEntity.type == Type.video) {
+      hasBar.value = true;
       contentsPage.value = Container(color: Colors.black);
       await Future.delayed(const Duration(milliseconds: 500));
       contentsPage.value = VideoPage(
         contentsEntity: contentsEntity,
       );
     } else if (contentsEntity.type == Type.rss) {
+      hasBar.value = false;
       contentsPage.value = Container(color: Colors.black);
       await Future.delayed(const Duration(milliseconds: 500));
       contentsPage.value = RssPage(
@@ -74,6 +74,17 @@ class PlayerStore {
     }
   }
 
+  Future<void> setWeatherEntity(LoginSource loginSource) async {
+    final result = await getWeather(
+        loginSource.terminalEntity.lat, loginSource.terminalEntity.lon);
+    result.fold((l) {
+      weatherEntity.value =
+          WeatherEntity(id: 0, icon: '', tempMin: '', tempMax: '');
+    }, (r) {
+      weatherEntity.value = r;
+    });
+  }
+
   Future<void> nextContents() async {
     final int numberOfContents = _contentsList.length;
     if ((numberOfContents - 1) == _contentsIndex) {
@@ -86,6 +97,7 @@ class PlayerStore {
 
   Future<void> initialize(LoginSource loginSource) async {
     setLoginSource(loginSource);
+    setWeatherEntity(loginSource);
     hasBar.value = loginSource.terminalEntity.hasBar;
     for (var contents in loginSource.terminalEntity.contentsList) {
       await pageStore.checkInternet();
@@ -130,6 +142,7 @@ class PlayerStore {
               deleteContentsList.add(contents);
             }
           }
+          setWeatherEntity(newLoginSource);
           setLoginSource(newLoginSource);
         });
       } else {

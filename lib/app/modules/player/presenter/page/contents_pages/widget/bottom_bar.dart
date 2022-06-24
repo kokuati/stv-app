@@ -7,7 +7,7 @@ class BottonBar extends StatelessWidget {
   final Function getSystemTime;
   final Function getSystemWeek;
   final Function getSystemDay;
-  final WeatherEntity weatherEntity;
+  final ValueNotifier<WeatherEntity> weatherEntity;
   final String logo;
   const BottonBar({
     Key? key,
@@ -59,7 +59,7 @@ class BottonBar extends StatelessWidget {
                     inherit: false,
                     color: Color.fromARGB(255, 40, 40, 40),
                     fontSize: 15,
-                    fontWeight: FontWeight.w300,
+                    fontWeight: FontWeight.w500,
                     fontFamily: 'Segoe'),
               ),
               Text(
@@ -69,7 +69,7 @@ class BottonBar extends StatelessWidget {
                     inherit: false,
                     color: Color.fromARGB(255, 40, 40, 40),
                     fontSize: 15,
-                    fontWeight: FontWeight.w300,
+                    fontWeight: FontWeight.w500,
                     fontFamily: 'Segoe'),
               )
             ],
@@ -77,43 +77,55 @@ class BottonBar extends StatelessWidget {
           SizedBox(
             width: (widthScreen * 0.055),
           ),
-          weatherEntity.tempMax.isNotEmpty && weatherEntity.tempMin.isNotEmpty
-              ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      "${weatherEntity.tempMin}˚",
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                          inherit: false,
-                          color: Color.fromARGB(255, 40, 40, 40),
-                          fontSize: 15,
-                          fontWeight: FontWeight.w300,
-                          fontFamily: 'Segoe'),
-                    ),
-                    Text(
-                      "${weatherEntity.tempMax}˚",
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                          inherit: false,
-                          color: Color(0xFFF94D4D),
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          fontFamily: 'Segoe'),
-                    )
-                  ],
-                )
-              : const SizedBox(),
+          ValueListenableBuilder(
+              valueListenable: weatherEntity,
+              builder: (BuildContext context, WeatherEntity weatherEntity,
+                  Widget? child) {
+                return weatherEntity.tempMax.isNotEmpty &&
+                        weatherEntity.tempMin.isNotEmpty
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            "${weatherEntity.tempMin}˚",
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                                inherit: false,
+                                color: Color.fromARGB(255, 40, 40, 40),
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                                fontFamily: 'Segoe'),
+                          ),
+                          Text(
+                            "${weatherEntity.tempMax}˚",
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                                inherit: false,
+                                color: Color(0xFFF94D4D),
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                fontFamily: 'Segoe'),
+                          )
+                        ],
+                      )
+                    : const SizedBox();
+              }),
           SizedBox(
             width: (widthScreen * 0.013),
           ),
-          weatherEntity.tempMax.isNotEmpty && weatherEntity.tempMin.isNotEmpty
-              ? Image.asset(
-                  'images/${weatherEntity.icon}.png',
-                  height: heightScreen * 0.055,
-                )
-              : const SizedBox(),
+          ValueListenableBuilder(
+              valueListenable: weatherEntity,
+              builder: (BuildContext context, WeatherEntity weatherEntity,
+                  Widget? child) {
+                return weatherEntity.tempMax.isNotEmpty &&
+                        weatherEntity.tempMin.isNotEmpty
+                    ? Image.asset(
+                        'images/${weatherEntity.icon}.png',
+                        height: heightScreen * 0.055,
+                      )
+                    : const SizedBox();
+              }),
           const Expanded(child: SizedBox()),
           Image.file(
             File(logo),

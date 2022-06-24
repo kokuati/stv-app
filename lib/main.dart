@@ -27,17 +27,22 @@ import 'package:saudetv/app/modules/auth/domain/usecases/login.dart';
 import 'package:saudetv/app/core/external/datasources/user_remote_datasource.dart';
 import 'package:saudetv/app/modules/auth/presenter/stores/login_store.dart';
 import 'package:saudetv/app/modules/player/domain/repositories/contents_repository_i.dart';
+import 'package:saudetv/app/modules/player/domain/repositories/weather_repository_i.dart';
 import 'package:saudetv/app/modules/player/domain/usecases/delete_contents.dart';
 import 'package:saudetv/app/modules/player/domain/usecases/get_contents.dart';
+import 'package:saudetv/app/modules/player/domain/usecases/get_weather.dart';
 import 'package:saudetv/app/modules/player/domain/usecases/read_contents.dart';
 import 'package:saudetv/app/modules/player/domain/usecases/save_contents.dart';
 import 'package:saudetv/app/modules/player/domain/usecases/save_video.dart';
 import 'package:saudetv/app/modules/player/domain/usecases/update_terminal.dart';
 import 'package:saudetv/app/modules/player/external/datasources/contents_local_datasource.dart';
 import 'package:saudetv/app/modules/player/external/datasources/contents_remote_datasource.dart';
+import 'package:saudetv/app/modules/player/external/datasources/weather_remote_datasource.dart';
 import 'package:saudetv/app/modules/player/infra/datasources/contents_local_datasource_i.dart';
 import 'package:saudetv/app/modules/player/infra/datasources/contents_remote_datasource_i.dart';
+import 'package:saudetv/app/modules/player/infra/datasources/weather_remote_datasource_i.dart';
 import 'package:saudetv/app/modules/player/infra/repositories/contents_repository.dart';
+import 'package:saudetv/app/modules/player/infra/repositories/weather_repository.dart';
 import 'package:saudetv/app/modules/player/presenter/stores/player_store.dart';
 import 'package:saudetv/app/services/check_internet/check_internet_interface.dart';
 import 'package:saudetv/app/services/check_internet/connectivity_plus_service.dart';
@@ -59,6 +64,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const String baseUrl = 'http://api.saudetvpainel.com.br/api';
+    const String weatherUrl = 'https://api.openweathermap.org/data/2.5/weather';
+    const String weatherToken = '35ed945a96f02ff1bd8703face65996f';
     const String videoPath = 'video';
     return Shortcuts(
       shortcuts: <LogicalKeySet, Intent>{
@@ -76,6 +83,12 @@ class MyApp extends StatelessWidget {
           Provider<GetPathInterface>(
               create: (context) => PathProviderService()),
           //DataSources
+          Provider<IWeatherRemoteDataSource>(
+              create: (context) => WeatherRemoteDataSource(
+                    baseURL: weatherUrl,
+                    token: weatherToken,
+                    clientHttp: context.read(),
+                  )),
           Provider<IUserLocalDataSource>(
               create: (context) => UserLocalDataSource(
                     localStorage: context.read(),
@@ -104,6 +117,10 @@ class MyApp extends StatelessWidget {
                     clientHttp: context.read(),
                   )),
           //Repositories
+          Provider<IWeatherRepository>(
+              create: (context) => WeatherRepository(
+                    remoteDataSource: context.read(),
+                  )),
           Provider<IUserRepository>(
               create: (context) => UserRepository(
                     localDataSource: context.read(),
@@ -163,6 +180,10 @@ class MyApp extends StatelessWidget {
                     saveUser: context.read(),
                     saveLogo: context.read(),
                   )),
+          Provider<IGetWeather>(
+              create: (context) => GetWeather(
+                    repository: context.read(),
+                  )),
           Provider<IGetTerminal>(
               create: (context) => GetTerminal(
                     saveTerminal: context.read(),
@@ -210,10 +231,12 @@ class MyApp extends StatelessWidget {
                   )),
           Provider<PlayerStore>(
               create: (context) => PlayerStore(
-                  getContents: context.read(),
-                  updateTerminal: context.read(),
-                  deleteContents: context.read(),
-                  pageStore: context.read())),
+                    getContents: context.read(),
+                    getWeather: context.read(),
+                    updateTerminal: context.read(),
+                    deleteContents: context.read(),
+                    pageStore: context.read(),
+                  )),
         ],
         child: MaterialApp(
           title: 'Saude TV',
