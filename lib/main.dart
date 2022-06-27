@@ -195,6 +195,8 @@ class MyApp extends StatelessWidget {
                     readContents: context.read(),
                     saveContents: context.read(),
                     saveVideo: context.read(),
+                    getUser: context.read(),
+                    readUser: context.read(),
                   )),
           Provider<IUpdateTerminal>(
               create: (context) => UpdateTerminal(

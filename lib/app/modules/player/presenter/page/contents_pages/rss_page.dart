@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:saudetv/app/modules/player/domain/entities/contents_entity.dart';
+import 'package:saudetv/app/modules/player/domain/entities/news_entity.dart';
 import 'package:saudetv/app/modules/player/presenter/stores/player_store.dart';
 
 class RssPage extends StatefulWidget {
@@ -22,6 +24,8 @@ class _RssPageState extends State<RssPage> {
   @override
   void initState() {
     final playerStore = context.read<PlayerStore>();
+    final news = getNews(widget.contentsEntity.contents);
+    print(news);
     _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
       _timer.cancel();
       playerStore.nextContents();
@@ -46,5 +50,14 @@ class _RssPageState extends State<RssPage> {
       width: width,
       child: const Center(child: CircularProgressIndicator()),
     );
+  }
+
+  NewsEntity getNews(dynamic contents) {
+    if (contents is List<NewsEntity>) {
+      final randomIndex = Random().nextInt(contents.length - 1);
+      return contents[randomIndex];
+    } else {
+      return NewsEntity(source: '', title: '', image: '');
+    }
   }
 }

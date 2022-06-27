@@ -112,17 +112,13 @@ class PlayerStore {
   }
 
   Future<void> upDateContents() async {
-    print(_isUpdate);
-    print(_lateUpDate);
-    if (!_isUpdate) {
+    if (!_isUpdate && updateTime()) {
       _isUpdate = true;
-      print(_isUpdate);
       await pageStore.checkInternet();
       if (pageStore.isConnect.value && !_isDelete) {
         _lateUpDate = false;
-        print(_lateUpDate);
+        setWeatherEntity(loginSource);
         final terminalResult = await updateTerminal(loginSource);
-        print(terminalResult);
         terminalResult.fold((l) => null, (newLoginSource) async {
           List<ContentsEntity> newContentsList = [];
           for (var contents in newLoginSource.terminalEntity.contentsList) {
@@ -149,6 +145,29 @@ class PlayerStore {
         _lateUpDate = true;
       }
       _isUpdate = false;
+    }
+  }
+
+  bool updateTime() {
+    final dayTime = DateTime.now();
+    final updateStart = DateTime(
+      dayTime.year,
+      dayTime.month,
+      dayTime.day,
+      loginSource.terminalEntity.updateStartHour,
+      loginSource.terminalEntity.updateStartMinute,
+    );
+    final updateEnd = DateTime(
+      dayTime.year,
+      dayTime.month,
+      dayTime.day,
+      loginSource.terminalEntity.updateEndHour,
+      loginSource.terminalEntity.updateEndMinute,
+    );
+    if (dayTime.isAfter(updateStart) && dayTime.isBefore(updateEnd)) {
+      return true;
+    } else {
+      return false;
     }
   }
 

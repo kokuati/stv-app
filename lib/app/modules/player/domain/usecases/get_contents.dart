@@ -1,3 +1,5 @@
+import 'package:saudetv/app/core/domain/usecases/get_user.dart';
+import 'package:saudetv/app/core/domain/usecases/read_user.dart';
 import 'package:saudetv/app/core/errors/errors.dart';
 import 'package:saudetv/app/modules/player/domain/entities/contents_entity.dart';
 import 'package:saudetv/app/modules/player/domain/repositories/contents_repository_i.dart';
@@ -14,11 +16,15 @@ abstract class IGetContents {
 
 class GetContents extends IGetContents {
   final IContentsRepository contentsRepository;
+  final IReadUser readUser;
+  final IGetUser getUser;
   final IReadContents readContents;
   final ISaveContents saveContents;
   final ISaveVideo saveVideo;
   GetContents({
     required this.contentsRepository,
+    required this.readUser,
+    required this.getUser,
     required this.readContents,
     required this.saveContents,
     required this.saveVideo,
@@ -29,7 +35,7 @@ class GetContents extends IGetContents {
       String contentsID, String token, bool isConnect) async {
     final readResult = await readContents(contentsID);
     return readResult.fold((empty) async {
-      final result = await _getContents(contentsID, token, isConnect);
+      final result = await _getContents(contentsID, isConnect);
       return result.fold((l) => left(l), (model) async {
         if (model.type == Type.video) {
           final videoResult = await saveVideo(model);
@@ -44,7 +50,7 @@ class GetContents extends IGetContents {
       });
     }, (readEntity) async {
       if (readEntity.type != Type.video && !_isSameDay(readEntity.updateData)) {
-        final result = await _getContents(contentsID, token, isConnect);
+        final result = await _getContents(contentsID, isConnect);
         return result.fold((l) => left(l), (r) async {
           await saveContents(r);
           return right(r);
@@ -56,18 +62,37 @@ class GetContents extends IGetContents {
   }
 
   Future<Either<Errors, ContentsModel>> _getContents(
-      String contentsID, String token, bool isConnect) async {
+      String contentsID, bool isConnect) async {
     if (isConnect) {
-      final result = await contentsRepository.getContents(contentsID, token);
-      return result.fold((error) {
-        if (error.statusCode == 400 || error.statusCode == 404) {
-          return left(ContentError(message: 'Conteudo inválidos'));
-        } else {
-          return left(ContentError(
-              message: 'Ocorreu um erro. tente novamente mais tarde'));
-        }
-      }, (entity) async {
-        return right(entity);
+      final readResult = await readUser();
+      return readResult.fold((l) {
+        return left(ContentError(
+            message: 'Ocorreu um erro. tente novamente mais tarde'));
+      }, (readEntity) async {
+        final result =
+            await contentsRepository.getContents(contentsID, readEntity.token);
+        return result.fold((error) async {
+          if (error.statusCode == 400 || error.statusCode == 404) {
+            final userResult = await getUser(
+                readEntity.user, readEntity.password, readEntity.terminal);
+            return userResult.fold(
+                (l) => left(ContentError(
+                    message: 'Ocorreu um erro. tente novamente mais tarde')),
+                (newEntiy) async {
+              final newResult = await contentsRepository.getContents(
+                  contentsID, newEntiy.token);
+              return newResult.fold(
+                  (l) => left(ContentError(
+                      message: 'Ocorreu um erro. tente novamente mais tarde')),
+                  (entity) => right(entity));
+            });
+          } else {
+            return left(ContentError(
+                message: 'Ocorreu um erro. tente novamente mais tarde'));
+          }
+        }, (entity) async {
+          return right(entity);
+        });
       });
     } else {
       return left(Empty(message: 'Sem conexão a internet'));
