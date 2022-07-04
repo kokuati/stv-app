@@ -56,37 +56,9 @@ class _PlayerPageState extends State<PlayerPage> {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     return ValueListenableBuilder(
-      valueListenable: playerStore.hasBar,
-      builder: (BuildContext context, bool bar, Widget? child) {
-        return SizedBox(
-          height: height,
-          width: width,
-          child: Column(
-            children: [
-              Expanded(
-                  child: ValueListenableBuilder(
-                      valueListenable: playerStore.contentsPage,
-                      builder:
-                          (BuildContext context, Widget value, Widget? child) {
-                        return value;
-                      })),
-              playerStore.hasBar.value
-                  ? SizedBox(
-                      height: height * 0.11111111,
-                      width: width,
-                      child: BottonBar(
-                        getSystemTime: playerStore.getSystemTime,
-                        getSystemWeek: playerStore.getSystemWeek,
-                        getSystemDay: playerStore.getSystemDay,
-                        weatherEntity: playerStore.weatherEntity,
-                        logo: playerStore.loginSource.userEntity.logo,
-                      ),
-                    )
-                  : const SizedBox(),
-            ],
-          ),
-        );
-      },
-    );
+        valueListenable: playerStore.contentsPage,
+        builder: (BuildContext context, Widget value, Widget? child) {
+          return value;
+        });
   }
 }

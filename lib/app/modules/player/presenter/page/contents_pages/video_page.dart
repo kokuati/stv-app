@@ -48,10 +48,9 @@ class VideoPageState extends State<VideoPage> {
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
-    final playerStore = context.read<PlayerStore>();
     return SizedBox(
-      height: playerStore.hasBar.value ? (height * 0.9) : height,
-      width: playerStore.hasBar.value ? (width * 0.9) : width,
+      height: height,
+      width: width,
       child: controller.value.isInitialized
           ? Container(alignment: Alignment.topCenter, child: buildVideoPlayer())
           : const SizedBox(

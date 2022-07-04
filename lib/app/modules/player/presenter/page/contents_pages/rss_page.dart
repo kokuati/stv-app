@@ -41,10 +41,8 @@ class _RssPageState extends State<RssPage> {
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
-    final playerStore = context.read<PlayerStore>();
     return SizedBox(
-      height:
-          playerStore.hasBar.value ? (height - (height * 0.11111111)) : height,
+      height: height,
       width: width,
       child: const Center(child: CircularProgressIndicator()),
     );

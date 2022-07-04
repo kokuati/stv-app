@@ -30,7 +30,7 @@ class PlayerStore {
 
   ValueNotifier<Widget> contentsPage =
       ValueNotifier(const CircularProgressPage());
-  ValueNotifier<bool> hasBar = ValueNotifier(false);
+  //ValueNotifier<bool> hasBar = ValueNotifier(false);
   ValueNotifier<WeatherEntity> weatherEntity =
       ValueNotifier(WeatherEntity(id: 0, icon: '', tempMin: '', tempMax: ''));
   late LoginSource _loginSource;
@@ -52,14 +52,12 @@ class PlayerStore {
 
   Future<void> setContentsPage(ContentsEntity contentsEntity) async {
     if (contentsEntity.type == Type.video) {
-      hasBar.value = true;
       contentsPage.value = Container(color: Colors.black);
       await Future.delayed(const Duration(milliseconds: 500));
       contentsPage.value = VideoPage(
         contentsEntity: contentsEntity,
       );
     } else if (contentsEntity.type == Type.rss) {
-      hasBar.value = false;
       contentsPage.value = Container(color: Colors.black);
       await Future.delayed(const Duration(milliseconds: 500));
       contentsPage.value = RssPage(
@@ -98,7 +96,6 @@ class PlayerStore {
   Future<void> initialize(LoginSource loginSource) async {
     setLoginSource(loginSource);
     setWeatherEntity(loginSource);
-    hasBar.value = loginSource.terminalEntity.hasBar;
     for (var contents in loginSource.terminalEntity.contentsList) {
       await pageStore.checkInternet();
       final contentsResult = await getContents(
