@@ -26,7 +26,7 @@ class BottonBar extends StatelessWidget {
       height: heightScreen * 0.11111111,
       width: widthScreen,
       decoration: const BoxDecoration(
-        color: Colors.white,
+        color: Color.fromARGB(40, 255, 255, 255),
       ),
       child: Row(
         children: [

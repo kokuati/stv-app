@@ -24,8 +24,6 @@ class _RssPageState extends State<RssPage> {
   @override
   void initState() {
     final playerStore = context.read<PlayerStore>();
-    final news = getNews(widget.contentsEntity.contents);
-    print(news);
     _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
       _timer.cancel();
       playerStore.nextContents();

@@ -29,8 +29,9 @@ class GetUser implements IGetUser {
       if (error.statusCode == 400 || error.statusCode == 404) {
         return left(UserError(message: 'Usuário e/ou senha inválidos'));
       } else {
-        return left(
-            UserError(message: 'Ocorreu um erro. tente novamente mais tarde'));
+        return left(UserError(
+            message:
+                'Ocorreu um erro. tente novamente mais tarde - ${error.statusCode}'));
       }
     }, (mode) async {
       if (mode.terminalList.isEmpty) {

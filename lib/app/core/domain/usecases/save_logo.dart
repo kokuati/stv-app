@@ -21,7 +21,7 @@ class SaveLogo extends ISaveLogo {
       final Directory appDocDir = await getPath.getAppDocumentsDirectory();
       final String base64 = logo.substring(logo.lastIndexOf(',') + 1);
       final decodedBytes = base64Decode(base64);
-      final type = logo.substring(11, 15);
+      final type = logo.substring((logo.indexOf('/') + 1), (logo.indexOf(';')));
       var fileLogo = File("${appDocDir.path}/logo.$type");
       await fileLogo.writeAsBytes(decodedBytes);
       return right(fileLogo.path);

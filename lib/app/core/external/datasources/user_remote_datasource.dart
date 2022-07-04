@@ -24,7 +24,9 @@ class UserRemoteDataSource extends IUserRemoteDataSource {
       final Map data = response.data["data"];
       final List<String> terminalList = [];
       for (var item in data["customer"]["terminals"]) {
-        terminalList.add(item);
+        if (item.toString().isNotEmpty) {
+          terminalList.add(item.toString());
+        }
       }
       final UserModel model = UserModel(
         user: email,

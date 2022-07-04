@@ -65,7 +65,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     const String baseUrl = 'http://api.saudetvpainel.com.br/api';
     const String weatherUrl = 'https://api.openweathermap.org/data/2.5/weather';
-    const String weatherToken = '35ed945a96f02ff1bd8703face65996f';
+    const String weatherToken = 'a964d0a1f5ddd3285f0d9f124018af1f';
     const String videoPath = 'video';
     return Shortcuts(
       shortcuts: <LogicalKeySet, Intent>{

@@ -27,7 +27,8 @@ class GetTerminal extends IGetTerminal {
         return left(TerminalError(message: 'Terminal inválidos'));
       } else {
         return left(TerminalError(
-            message: 'Ocorreu um erro. tente novamente mais tarde'));
+            message:
+                'Ocorreu um erro. tente novamente mais tarde - ${error.statusCode}'));
       }
     }, (entity) async {
       await saveTerminal(entity);

@@ -26,17 +26,17 @@ class TerminalRemoteDataSource extends ITerminalRemoteDataSource {
         contentsList.add(item);
       }
       final TerminalModel model = TerminalModel(
-          id: terminalID,
-          contentsList: contentsList,
-          hasBar: true,
-          updateStartHour: int.parse(data["data"]["startHour"].substring(0, 2)),
-          updateStartMinute:
-              int.parse(data["data"]["startHour"].substring(3, 5)),
-          updateEndHour: int.parse(data["data"]["endHour"].substring(0, 2)),
-          updateEndMinute: int.parse(data["data"]["endHour"].substring(3, 5)),
-          updateTimeCourseMin: int.parse(data["data"]["refreshTime"]),
-          lat: '-23.5521',
-          lon: '-46.6605');
+        id: terminalID,
+        contentsList: contentsList,
+        hasBar: false,
+        updateStartHour: int.parse(data["data"]["startHour"].substring(0, 2)),
+        updateStartMinute: int.parse(data["data"]["startHour"].substring(3, 5)),
+        updateEndHour: int.parse(data["data"]["endHour"].substring(0, 2)),
+        updateEndMinute: int.parse(data["data"]["endHour"].substring(3, 5)),
+        updateTimeCourseMin: int.parse(data["data"]["refreshTime"]),
+        lat: data["data"]["location"]["lat"].toString(),
+        lon: data["data"]["location"]["lng"].toString(),
+      );
       return model;
     } on DioError catch (e) {
       throw e.response!.statusCode!;

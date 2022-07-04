@@ -30,7 +30,7 @@ class PlayerStore {
 
   ValueNotifier<Widget> contentsPage =
       ValueNotifier(const CircularProgressPage());
-  ValueNotifier<bool> hasBar = ValueNotifier(true);
+  ValueNotifier<bool> hasBar = ValueNotifier(false);
   ValueNotifier<WeatherEntity> weatherEntity =
       ValueNotifier(WeatherEntity(id: 0, icon: '', tempMin: '', tempMax: ''));
   late LoginSource _loginSource;
@@ -103,7 +103,7 @@ class PlayerStore {
       await pageStore.checkInternet();
       final contentsResult = await getContents(
           contents, loginSource.userEntity.token, pageStore.isConnect.value);
-      contentsResult.fold((l) => null, (contentsEntity) {
+      contentsResult.fold((l) => print(l), (contentsEntity) {
         _contentsList.add(contentsEntity);
       });
     }

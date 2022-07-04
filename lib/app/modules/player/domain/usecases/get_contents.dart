@@ -63,6 +63,7 @@ class GetContents extends IGetContents {
 
   Future<Either<Errors, ContentsModel>> _getContents(
       String contentsID, bool isConnect) async {
+    print(contentsID);
     if (isConnect) {
       final readResult = await readUser();
       return readResult.fold((l) {
