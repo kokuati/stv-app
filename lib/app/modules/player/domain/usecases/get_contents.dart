@@ -49,7 +49,7 @@ class GetContents extends IGetContents {
         }
       });
     }, (readEntity) async {
-      if (readEntity.type != Type.video && !_isSameDay(readEntity.updateData)) {
+      if (readEntity.type != Type.video) {
         final result = await _getContents(contentsID, isConnect);
         return result.fold((l) => left(l), (r) async {
           await saveContents(r);
@@ -98,12 +98,5 @@ class GetContents extends IGetContents {
     } else {
       return left(Empty(message: 'Sem conexão a internet'));
     }
-  }
-
-  bool _isSameDay(DateTime date) {
-    DateTime toDate = DateTime.now();
-    return toDate.year == date.year &&
-        toDate.month == date.month &&
-        toDate.day == date.day;
   }
 }

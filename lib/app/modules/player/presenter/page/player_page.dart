@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:saudetv/app/core/presenter/stores/page_store.dart';
-import 'package:saudetv/app/modules/player/presenter/page/contents_pages/widget/bottom_bar.dart';
 import 'package:saudetv/app/modules/player/presenter/stores/player_store.dart';
 
 import '../../../../core/domain/adapter/login_source.dart';
@@ -53,8 +52,6 @@ class _PlayerPageState extends State<PlayerPage> {
   @override
   Widget build(BuildContext context) {
     final playerStore = context.read<PlayerStore>();
-    double height = MediaQuery.of(context).size.height;
-    double width = MediaQuery.of(context).size.width;
     return ValueListenableBuilder(
         valueListenable: playerStore.contentsPage,
         builder: (BuildContext context, Widget value, Widget? child) {

@@ -39,12 +39,14 @@ class PlayerStore {
   int _contentsIndex = 0;
   bool _lateUpDate = false;
   bool _isUpdate = false;
+  bool _isInitialize = false;
   bool _isDelete = false;
 
   LoginSource get loginSource => _loginSource;
   List<ContentsEntity> get contentsList => _contentsList;
   List<String> get deleteContentsList => _deleteContentsList;
   bool get lateUpDate => _lateUpDate;
+  bool get isInitialize => _isInitialize;
 
   void setLoginSource(LoginSource loginSource) {
     _loginSource = loginSource;
@@ -59,10 +61,14 @@ class PlayerStore {
       );
     } else if (contentsEntity.type == Type.rss) {
       contentsPage.value = Container(color: Colors.black);
-      await Future.delayed(const Duration(milliseconds: 500));
-      contentsPage.value = RssPage(
-        contentsEntity: contentsEntity,
-      );
+      if (_isSameDay(contentsEntity.updateData)) {
+        await Future.delayed(const Duration(milliseconds: 500));
+        contentsPage.value = RssPage(
+          contentsEntity: contentsEntity,
+        );
+      } else {
+        nextContents();
+      }
     } else {
       contentsPage.value = Container(color: Colors.black);
       await Future.delayed(const Duration(milliseconds: 500));
@@ -94,6 +100,7 @@ class PlayerStore {
   }
 
   Future<void> initialize(LoginSource loginSource) async {
+    _isInitialize = true;
     setLoginSource(loginSource);
     setWeatherEntity(loginSource);
     for (var contents in loginSource.terminalEntity.contentsList) {
@@ -105,11 +112,12 @@ class PlayerStore {
       });
     }
     setContentsPage(contentsList[0]);
+    _isInitialize = false;
     upDateContents();
   }
 
   Future<void> upDateContents() async {
-    if (!_isUpdate && updateTime()) {
+    if (!_isUpdate && _isInitialize && updateTime()) {
       _isUpdate = true;
       await pageStore.checkInternet();
       if (pageStore.isConnect.value && !_isDelete) {
@@ -230,5 +238,12 @@ class PlayerStore {
       month = '0${now.month}';
     }
     return '$day/$month';
+  }
+
+  bool _isSameDay(DateTime date) {
+    DateTime toDate = DateTime.now();
+    return toDate.year == date.year &&
+        toDate.month == date.month &&
+        toDate.day == date.day;
   }
 }

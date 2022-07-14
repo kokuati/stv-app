@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:saudetv/app/modules/player/domain/entities/contents_entity.dart';
-import 'package:saudetv/app/modules/player/domain/entities/news_entity.dart';
 import 'package:saudetv/app/modules/player/infra/datasources/contents_remote_datasource_i.dart';
 import 'package:saudetv/app/modules/player/infra/models/contents_model.dart';
 import 'package:saudetv/app/services/client_http/client_http_interface.dart';
@@ -15,8 +14,8 @@ class ContentsRemoteDataSource extends IContentsRemoteDataSource {
   @override
   Future<ContentsModel> getContents(String contentsID, String token) async {
     clientHttp.setBaseUrl(baseURL);
-    clientHttp.setConnectTimeout(500000);
-    clientHttp.setReceiveTimeout(500000);
+    clientHttp.setConnectTimeout(50000000);
+    clientHttp.setReceiveTimeout(50000000);
     clientHttp.setHeaders({'Authorization': "Bearer $token"});
 
     try {
@@ -27,7 +26,7 @@ class ContentsRemoteDataSource extends IContentsRemoteDataSource {
       if (contentsType == Type.video) {
         contentsInfo = data["data"]["file"];
       } else if (contentsType == Type.rss) {
-        contentsInfo = doNewsList(data["data"]["rss"]);
+        contentsInfo = data["data"];
       }
       final ContentsModel model = ContentsModel(
         id: contentsID,
@@ -56,23 +55,5 @@ class ContentsRemoteDataSource extends IContentsRemoteDataSource {
       default:
         return Type.outros;
     }
-  }
-
-  List<NewsEntity> doNewsList(dynamic data) {
-    final List list = data;
-    bool a = true;
-    List<NewsEntity> newsList = [];
-    for (var i = 0; a; i++) {
-      if (list[i]["media:content"][0]["\$"]["url"].toString().isNotEmpty) {
-        final entity = NewsEntity(
-          source: list[i]["category"][0],
-          title: list[i]["title"][0],
-          image: list[i]["media:content"][0]["\$"]["url"],
-        );
-        newsList.add(entity);
-        a = false;
-      }
-    }
-    return newsList;
   }
 }
