@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:saudetv/app/modules/player/domain/entities/contents_entity.dart';
 import 'package:saudetv/app/modules/player/domain/entities/news_entity.dart';
-import 'package:saudetv/app/modules/player/presenter/page/contents_pages/widget/background_news.dart';
 import 'package:saudetv/app/modules/player/presenter/stores/player_store.dart';
+
+import 'widget/background_news.dart';
 
 class RssPage extends StatefulWidget {
   final ContentsEntity contentsEntity;
@@ -31,6 +32,8 @@ class _RssPageState extends State<RssPage> {
 
   @override
   void initState() {
+    final playerStore = context.read<PlayerStore>();
+    playerStore.upDateContents();
     _time = 10;
     _newsEntity = getNews(widget.contentsEntity.contents);
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -158,7 +161,7 @@ class _RssPageState extends State<RssPage> {
                                 softWrap: true,
                                 style: TextStyle(
                                   inherit: false,
-                                  fontSize: height * 0.03,
+                                  fontSize: height * 0.04,
                                   fontFamily: 'Segoe',
                                   fontWeight: FontWeight.w700,
                                   color: const Color(0xFF1C1C1C),

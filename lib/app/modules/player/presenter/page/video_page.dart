@@ -22,9 +22,7 @@ class VideoPageState extends State<VideoPage> {
   @override
   void initState() {
     final playerStore = context.read<PlayerStore>();
-    if (widget.contentsEntity.contents.toString().isEmpty) {
-      playerStore.addDeleteContentsList(widget.contentsEntity.id);
-    }
+    playerStore.upDateContents();
     final File video = File(widget.contentsEntity.contents);
     controller = VideoPlayerController.file(video)
       ..addListener(() => setState(() {}))

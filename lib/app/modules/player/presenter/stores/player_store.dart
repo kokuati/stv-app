@@ -2,40 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:saudetv/app/core/domain/adapter/login_source.dart';
 import 'package:saudetv/app/core/presenter/stores/page_store.dart';
 import 'package:saudetv/app/modules/player/domain/entities/contents_entity.dart';
-import 'package:saudetv/app/modules/player/domain/entities/weather_entity.dart';
 import 'package:saudetv/app/modules/player/domain/usecases/delete_contents.dart';
 import 'package:saudetv/app/modules/player/domain/usecases/get_contents.dart';
-import 'package:saudetv/app/modules/player/domain/usecases/get_weather.dart';
 import 'package:saudetv/app/modules/player/domain/usecases/update_terminal.dart';
-import 'package:saudetv/app/modules/player/presenter/page/contents_pages/circular_pregress_page.dart';
-import 'package:saudetv/app/modules/player/presenter/page/contents_pages/others_page.dart';
-import 'package:saudetv/app/modules/player/presenter/page/contents_pages/rss_page.dart';
-import 'package:saudetv/app/modules/player/presenter/page/contents_pages/video_page.dart';
-import 'package:intl/intl.dart';
+import 'package:saudetv/app/types/time.dart';
+
+import '../page/others_page.dart';
+import '../page/rss_page.dart';
+import '../page/video_page.dart';
 
 class PlayerStore {
   final IGetContents getContents;
-  final IGetWeather getWeather;
   final IUpdateTerminal updateTerminal;
   final IDeleteContents deleteContents;
   final PageStore pageStore;
 
   PlayerStore({
     required this.getContents,
-    required this.getWeather,
     required this.updateTerminal,
     required this.deleteContents,
     required this.pageStore,
   });
 
-  ValueNotifier<Widget> contentsPage =
-      ValueNotifier(const CircularProgressPage());
-  //ValueNotifier<bool> hasBar = ValueNotifier(false);
-  ValueNotifier<WeatherEntity> weatherEntity =
-      ValueNotifier(WeatherEntity(id: 0, icon: '', tempMin: '', tempMax: ''));
   late LoginSource _loginSource;
-  List<ContentsEntity> _contentsList = [];
+  final List<ContentsEntity> _contentsList = [];
   final List<String> _deleteContentsList = [];
+  DateTime _upDateTime = DateTime.now();
   int _contentsIndex = 0;
   bool _lateUpDate = false;
   bool _isUpdate = false;
@@ -43,50 +35,36 @@ class PlayerStore {
   bool _isDelete = false;
 
   LoginSource get loginSource => _loginSource;
-  List<ContentsEntity> get contentsList => _contentsList;
-  List<String> get deleteContentsList => _deleteContentsList;
-  bool get lateUpDate => _lateUpDate;
-  bool get isInitialize => _isInitialize;
 
   void setLoginSource(LoginSource loginSource) {
     _loginSource = loginSource;
   }
 
-  Future<void> setContentsPage(ContentsEntity contentsEntity) async {
+  Future<void> _setContentsPage(ContentsEntity contentsEntity) async {
     if (contentsEntity.type == Type.video) {
-      contentsPage.value = Container(color: Colors.black);
-      await Future.delayed(const Duration(milliseconds: 500));
-      contentsPage.value = VideoPage(
+      pageStore.page.value = Container(color: Colors.black);
+      await Future.delayed(const Duration(milliseconds: 200));
+      pageStore.page.value = VideoPage(
         contentsEntity: contentsEntity,
       );
     } else if (contentsEntity.type == Type.rss) {
-      contentsPage.value = Container(color: Colors.black);
-      if (_isSameDay(contentsEntity.updateData)) {
-        await Future.delayed(const Duration(milliseconds: 500));
-        contentsPage.value = RssPage(
+      pageStore.page.value = Container(color: Colors.black);
+      if (TimeCuston()
+          .isSameDay(pageStore.dateUTC, contentsEntity.updateData)) {
+        await Future.delayed(const Duration(milliseconds: 200));
+        pageStore.page.value = RssPage(
           contentsEntity: contentsEntity,
         );
       } else {
         nextContents();
       }
     } else {
-      contentsPage.value = Container(color: Colors.black);
-      await Future.delayed(const Duration(milliseconds: 500));
-      contentsPage.value = OthersPage(
+      pageStore.page.value = Container(color: Colors.black);
+      await Future.delayed(const Duration(milliseconds: 200));
+      pageStore.page.value = OthersPage(
         contentsEntity: contentsEntity,
       );
     }
-  }
-
-  Future<void> setWeatherEntity(LoginSource loginSource) async {
-    final result = await getWeather(
-        loginSource.terminalEntity.lat, loginSource.terminalEntity.lon);
-    result.fold((l) {
-      weatherEntity.value =
-          WeatherEntity(id: 0, icon: '', tempMin: '', tempMax: '');
-    }, (r) {
-      weatherEntity.value = r;
-    });
   }
 
   Future<void> nextContents() async {
@@ -96,102 +74,98 @@ class PlayerStore {
     } else {
       _contentsIndex++;
     }
-    await setContentsPage(contentsList[_contentsIndex]);
+    await _setContentsPage(_contentsList[_contentsIndex]);
   }
 
   Future<void> initialize(LoginSource loginSource) async {
     _isInitialize = true;
     setLoginSource(loginSource);
-    setWeatherEntity(loginSource);
+    await pageStore.setDateUCT();
+    _upDateTime = pageStore.dateUTC
+        .add(Duration(minutes: loginSource.terminalEntity.updateTimeCourseMin));
     for (var contents in loginSource.terminalEntity.contentsList) {
       await pageStore.checkInternet();
-      final contentsResult = await getContents(
-          contents, loginSource.userEntity.token, pageStore.isConnect.value);
-      contentsResult.fold((l) => print(l), (contentsEntity) {
+      final contentsResult = await getContents(contents,
+          loginSource.userEntity.token, pageStore.isConnect, pageStore.dateUTC);
+      contentsResult.fold((l) => l, (contentsEntity) {
         _contentsList.add(contentsEntity);
+        if (_contentsList.length == 1) {
+          _setContentsPage(_contentsList[0]);
+        }
       });
     }
-    setContentsPage(contentsList[0]);
+    _upDateScheme();
     _isInitialize = false;
-    upDateContents();
   }
 
   Future<void> upDateContents() async {
-    if (!_isUpdate && _isInitialize && updateTime()) {
-      _isUpdate = true;
+    if (_deleteContentsList.isNotEmpty) {
+      await _delContents();
+    }
+    if (_lateUpDate) {
       await pageStore.checkInternet();
-      if (pageStore.isConnect.value && !_isDelete) {
-        _lateUpDate = false;
-        setWeatherEntity(loginSource);
-        final terminalResult = await updateTerminal(loginSource);
-        terminalResult.fold((l) => null, (newLoginSource) async {
-          List<ContentsEntity> newContentsList = [];
-          for (var contents in newLoginSource.terminalEntity.contentsList) {
-            await pageStore.checkInternet();
-            final contentsResult = await getContents(contents,
-                loginSource.userEntity.token, pageStore.isConnect.value);
-            contentsResult.fold((l) => null, (contentsEntity) {
-              newContentsList.add(contentsEntity);
-            });
-          }
-          if (newContentsList.isNotEmpty) {
-            _contentsList = newContentsList;
-          }
-          for (var contents in loginSource.terminalEntity.contentsList) {
-            if (!newLoginSource.terminalEntity.contentsList
-                .contains(contents)) {
-              deleteContentsList.add(contents);
-            }
-          }
-          setWeatherEntity(newLoginSource);
-          setLoginSource(newLoginSource);
-        });
-      } else {
-        _lateUpDate = true;
+      if (pageStore.isConnect) {
+        await _upDateScheme();
       }
-      _isUpdate = false;
-    }
-  }
-
-  bool updateTime() {
-    final dayTime = DateTime.now();
-    final updateStart = DateTime(
-      dayTime.year,
-      dayTime.month,
-      dayTime.day,
-      loginSource.terminalEntity.updateStartHour,
-      loginSource.terminalEntity.updateStartMinute,
-    );
-    final updateEnd = DateTime(
-      dayTime.year,
-      dayTime.month,
-      dayTime.day,
-      loginSource.terminalEntity.updateEndHour,
-      loginSource.terminalEntity.updateEndMinute,
-    );
-    if (dayTime.isAfter(updateStart) && dayTime.isBefore(updateEnd)) {
-      return true;
     } else {
-      return false;
-    }
-  }
-
-  Future<void> delContents() async {
-    if (!_isUpdate && !_isDelete) {
-      _isDelete = true;
-      List<String> list = [];
-      for (var contents in _deleteContentsList) {
-        if (await deleteContents(contents)) {
-          list.add(contents);
+      final bool goUpDate = pageStore.dateUTC.isAfter(_upDateTime);
+      if (goUpDate) {
+        _upDateTime = pageStore.dateUTC.add(
+            Duration(minutes: _loginSource.terminalEntity.updateTimeCourseMin));
+        final bool timeToUpDate = _updateTime(pageStore.dateUTC);
+        if (!_isUpdate && !_isInitialize && !_isDelete && timeToUpDate) {
+          await pageStore.checkInternet();
+          if (pageStore.isConnect) {
+            await _upDateScheme();
+          } else {
+            _lateUpDate = true;
+          }
         }
       }
-      for (var element in list) {
-        _deleteContentsList.remove(element);
+    }
+  }
+
+  Future<void> _upDateScheme() async {
+    _lateUpDate = false;
+    _isUpdate = true;
+    await pageStore.setDateUCT();
+    final terminalResult = await updateTerminal(loginSource);
+    await terminalResult.fold((l) => null, (newLoginSource) async {
+      List<ContentsEntity> newContentsList = [];
+      for (var contents in newLoginSource.terminalEntity.contentsList) {
+        await pageStore.checkInternet();
+        final contentsResult = await getContents(
+            contents,
+            loginSource.userEntity.token,
+            pageStore.isConnect,
+            pageStore.dateUTC);
+        contentsResult.fold((l) => null, (contentsEntity) {
+          newContentsList.add(contentsEntity);
+        });
+      }
+      if (newContentsList.isNotEmpty) {
+        _contentsList.clear();
+        _contentsList.addAll(newContentsList);
+      }
+      for (var contents in loginSource.terminalEntity.contentsList) {
+        if (!newLoginSource.terminalEntity.contentsList.contains(contents)) {
+          _deleteContentsList.add(contents);
+        }
+      }
+      setLoginSource(newLoginSource);
+    });
+    _isUpdate = false;
+  }
+
+  Future<void> _delContents() async {
+    if (!_isUpdate && !_isDelete) {
+      _isDelete = true;
+      for (var contents in _deleteContentsList) {
+        if (await deleteContents(contents)) {
+          _deleteContentsList.remove(contents);
+        }
       }
       _isDelete = false;
-      if (_lateUpDate) {
-        upDateContents();
-      }
     }
   }
 
@@ -199,51 +173,48 @@ class PlayerStore {
     _deleteContentsList.add(contentsID);
   }
 
-  String getSystemTime() {
-    var now = DateTime.now();
-    return DateFormat("HH:mm").format(now);
-  }
+  bool _updateTime(DateTime timeNow) {
+    final updateStartSis = DateTime(
+      timeNow.year,
+      timeNow.month,
+      timeNow.day,
+      loginSource.terminalEntity.updateStartHour,
+      loginSource.terminalEntity.updateStartMinute,
+    );
+    final updateEndSis = DateTime(
+      timeNow.year,
+      timeNow.month,
+      timeNow.day,
+      loginSource.terminalEntity.updateEndHour,
+      loginSource.terminalEntity.updateEndMinute,
+    );
 
-  String getSystemWeek() {
-    int week = DateTime.now().weekday;
-    if (week == 1) {
-      return 'Seg.';
-    } else if (week == 2) {
-      return 'Terç.';
-    } else if (week == 3) {
-      return 'Qua.';
-    } else if (week == 4) {
-      return 'Qui.';
-    } else if (week == 5) {
-      return 'Sex.';
-    } else if (week == 6) {
-      return 'Sáb.';
-    } else {
-      return 'Dom.';
+    DateTime updateStart = DateTime(
+      timeNow.year,
+      timeNow.month,
+      timeNow.day,
+      7,
+      0,
+    );
+    DateTime updateEnd = DateTime(
+      timeNow.year,
+      timeNow.month,
+      timeNow.day,
+      19,
+      0,
+    );
+    if (updateStartSis.isBefore(updateEndSis)) {
+      if ((updateStartSis.hour + updateStartSis.minute) != 0) {
+        updateStart = updateStartSis;
+      }
+      if ((updateEndSis.hour + updateEndSis.minute) != 0) {
+        updateEnd = updateEndSis;
+      }
     }
-  }
-
-  String getSystemDay() {
-    var now = DateTime.now();
-    String day = '';
-    String month = '';
-    if (now.day > 9) {
-      day = '${now.day}';
+    if (timeNow.isAfter(updateStart) && timeNow.isBefore(updateEnd)) {
+      return true;
     } else {
-      day = '0${now.day}';
+      return false;
     }
-    if (now.month > 9) {
-      month = '${now.month}';
-    } else {
-      month = '0${now.month}';
-    }
-    return '$day/$month';
-  }
-
-  bool _isSameDay(DateTime date) {
-    DateTime toDate = DateTime.now();
-    return toDate.year == date.year &&
-        toDate.month == date.month &&
-        toDate.day == date.day;
   }
 }

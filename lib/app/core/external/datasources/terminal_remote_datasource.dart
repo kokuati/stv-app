@@ -22,6 +22,8 @@ class TerminalRemoteDataSource extends ITerminalRemoteDataSource {
       final response = await clientHttp.get("/v1/terminals/$terminalID");
       final data = response.data;
       final List<String> contentsList = [];
+      final int courseMin =
+          ((int.parse(data["data"]["refreshTime"])) / 60).round();
       for (var item in data["data"]["playlists"][0]["contents"]) {
         contentsList.add(item);
       }
@@ -33,7 +35,7 @@ class TerminalRemoteDataSource extends ITerminalRemoteDataSource {
         updateStartMinute: int.parse(data["data"]["startHour"].substring(3, 5)),
         updateEndHour: int.parse(data["data"]["endHour"].substring(0, 2)),
         updateEndMinute: int.parse(data["data"]["endHour"].substring(3, 5)),
-        updateTimeCourseMin: int.parse(data["data"]["refreshTime"]),
+        updateTimeCourseMin: courseMin,
         lat: data["data"]["location"]["lat"].toString(),
         lon: data["data"]["location"]["lng"].toString(),
       );

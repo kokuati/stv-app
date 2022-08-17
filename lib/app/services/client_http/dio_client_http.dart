@@ -9,6 +9,10 @@ class DioClientHttp implements ClientHttpInterface {
 
   final _interceptors = <DioInterceptor>[];
 
+  void teste() {
+    _dio.options.responseType = ResponseType.stream;
+  }
+
   @override
   void setBaseUrl(String url) {
     _dio.options.baseUrl = url;
@@ -32,6 +36,12 @@ class DioClientHttp implements ClientHttpInterface {
   @override
   Future<BaseResponse> get(String path) async {
     final response = await _dio.get(path);
+    return _responseAdapter(response);
+  }
+
+  @override
+  Future<BaseResponse> download(String path, String savePath) async {
+    final response = await _dio.download(path, savePath);
     return _responseAdapter(response);
   }
 

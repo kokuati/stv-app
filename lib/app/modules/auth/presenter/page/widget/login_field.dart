@@ -39,6 +39,7 @@ class LoginField extends StatelessWidget {
             width: width,
             controller: controllerUser,
             onChanged: onChangedUser,
+            textInputType: TextInputType.emailAddress,
           ),
           SizedBox(
             height: height * 0.055,
@@ -49,6 +50,7 @@ class LoginField extends StatelessWidget {
             width: width,
             controller: controllerPassword,
             onChanged: onChangedPassword,
+            textInputType: TextInputType.visiblePassword,
           ),
           SizedBox(
             height: height * 0.055,
@@ -59,6 +61,7 @@ class LoginField extends StatelessWidget {
             width: width,
             controller: controllerTerminal,
             onChanged: onChangedTerminal,
+            textInputType: TextInputType.number,
           ),
           loginIsVald
               ? SizedBox(

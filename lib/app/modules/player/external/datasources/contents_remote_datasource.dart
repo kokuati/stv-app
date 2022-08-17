@@ -14,8 +14,8 @@ class ContentsRemoteDataSource extends IContentsRemoteDataSource {
   @override
   Future<ContentsModel> getContents(String contentsID, String token) async {
     clientHttp.setBaseUrl(baseURL);
-    clientHttp.setConnectTimeout(50000000);
-    clientHttp.setReceiveTimeout(50000000);
+    clientHttp.setConnectTimeout(60000 * 1);
+    clientHttp.setReceiveTimeout(60000 * 1);
     clientHttp.setHeaders({'Authorization': "Bearer $token"});
 
     try {

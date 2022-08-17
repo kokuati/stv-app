@@ -16,18 +16,19 @@ class SplashStore {
   SplashStore({
     required this.readUser,
     required this.readTerminal,
-    required this.pageStore,
     required this.getUser,
+    required this.pageStore,
   });
 
   Future<void> initializeApp() async {
     await pageStore.checkInternet();
     await Future.delayed(const Duration(seconds: 2));
+    await pageStore.setDateUCT();
     final userResult = await readUser();
     userResult.fold((l) {
       pageStore.page.value = const LoginPage();
     }, (userEntity) async {
-      if (pageStore.isConnect.value) {
+      if (pageStore.isConnect) {
         final getResult = await getUser(
             userEntity.user, userEntity.password, userEntity.terminal);
         getResult.fold((l) {

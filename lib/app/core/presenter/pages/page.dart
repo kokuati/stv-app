@@ -16,16 +16,12 @@ class _PagesState extends State<Pages> {
   @override
   void initState() {
     final pageStore = context.read<PageStore>();
-    pageStore.isConnect.addListener(() {
-      Timer.periodic(const Duration(seconds: 30), (timer) {
-        if (pageStore.isConnect.value) {
-          timer.cancel();
-        } else {
-          pageStore.checkInternet();
-        }
-      });
+    Timer.periodic(const Duration(minutes: 1), (timer) {
+      pageStore.upDataTime();
+      if (!pageStore.isConnect) {
+        pageStore.checkInternet();
+      }
     });
-
     super.initState();
   }
 

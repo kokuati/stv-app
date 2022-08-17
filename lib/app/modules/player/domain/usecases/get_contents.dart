@@ -11,7 +11,7 @@ import 'package:saudetv/app/types/either.dart';
 
 abstract class IGetContents {
   Future<Either<Errors, ContentsEntity>> call(
-      String contentsID, String token, bool isConnect);
+      String contentsID, String token, bool isConnect, DateTime dateUTC);
 }
 
 class GetContents extends IGetContents {
@@ -32,13 +32,13 @@ class GetContents extends IGetContents {
 
   @override
   Future<Either<Errors, ContentsEntity>> call(
-      String contentsID, String token, bool isConnect) async {
+      String contentsID, String token, bool isConnect, DateTime dateUTC) async {
     final readResult = await readContents(contentsID);
     return readResult.fold((empty) async {
       final result = await _getContents(contentsID, isConnect);
       return result.fold((l) => left(l), (model) async {
         if (model.type == Type.video) {
-          final videoResult = await saveVideo(model);
+          final videoResult = await saveVideo(model, dateUTC);
           return videoResult.fold((l) => left(l), (r) async {
             await saveContents(r);
             return right(r);
@@ -63,7 +63,6 @@ class GetContents extends IGetContents {
 
   Future<Either<Errors, ContentsModel>> _getContents(
       String contentsID, bool isConnect) async {
-    print(contentsID);
     if (isConnect) {
       final readResult = await readUser();
       return readResult.fold((l) {

@@ -41,7 +41,10 @@ class LoginStore {
 
   Future<void> login() async {
     islogged.value = true;
-    if (terminal.isNotEmpty && email.isNotEmpty && password.isNotEmpty) {
+    if (terminal.isNotEmpty &&
+        email.isNotEmpty &&
+        password.isNotEmpty &&
+        pageStore.isConnect) {
       final result = await loginUsecase.call(email, password, terminal);
       result.fold((error) {
         setErroMS(error.message);
@@ -49,7 +52,9 @@ class LoginStore {
         pageStore.page.value = PlayerPage(loginSource: loginSource);
       });
     } else {
-      setErroMS('Campo não preenchido');
+      pageStore.isConnect
+          ? setErroMS('Campo não preenchido')
+          : setErroMS('Sem conexão com a internet');
     }
     islogged.value = false;
   }

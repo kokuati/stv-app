@@ -2,8 +2,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:saudetv/app/core/domain/repositories/date_utc_repository_i.dart';
 import 'package:saudetv/app/core/domain/repositories/terminal_repository_i.dart';
 import 'package:saudetv/app/core/domain/repositories/user_repository_i.dart';
+import 'package:saudetv/app/core/domain/usecases/get_date_utc.dart';
 import 'package:saudetv/app/core/domain/usecases/get_terminal.dart';
 import 'package:saudetv/app/core/domain/usecases/internet_is_connected.dart';
 import 'package:saudetv/app/core/domain/usecases/read_terminal.dart';
@@ -11,6 +13,7 @@ import 'package:saudetv/app/core/domain/usecases/read_user.dart';
 import 'package:saudetv/app/core/domain/usecases/save_logo.dart';
 import 'package:saudetv/app/core/domain/usecases/save_terminal.dart';
 import 'package:saudetv/app/core/domain/usecases/save_user.dart';
+import 'package:saudetv/app/core/external/datasources/date_utc_remote_datasource.dart';
 import 'package:saudetv/app/core/external/datasources/terminal_local_datasource.dart';
 import 'package:saudetv/app/core/external/datasources/terminal_remote_datasource.dart';
 import 'package:saudetv/app/core/external/datasources/user_local_datasource.dart';
@@ -18,6 +21,7 @@ import 'package:saudetv/app/core/infra/datasources/terminal_local_datasource_i.d
 import 'package:saudetv/app/core/infra/datasources/terminal_remote_datasource_i.dart';
 import 'package:saudetv/app/core/infra/datasources/user_local_datasource_i.dart';
 import 'package:saudetv/app/core/infra/datasources/user_remote_datasource_i.dart';
+import 'package:saudetv/app/core/infra/repositories/date_utc_repository.dart';
 import 'package:saudetv/app/core/infra/repositories/terminal_repository.dart';
 import 'package:saudetv/app/core/infra/repositories/user_repository.dart';
 import 'package:saudetv/app/core/presenter/stores/page_store.dart';
@@ -27,6 +31,7 @@ import 'package:saudetv/app/modules/auth/domain/usecases/login.dart';
 import 'package:saudetv/app/core/external/datasources/user_remote_datasource.dart';
 import 'package:saudetv/app/modules/auth/presenter/stores/login_store.dart';
 import 'package:saudetv/app/modules/player/domain/repositories/contents_repository_i.dart';
+import 'package:saudetv/app/modules/player/domain/repositories/video_repository_i.dart';
 import 'package:saudetv/app/modules/player/domain/repositories/weather_repository_i.dart';
 import 'package:saudetv/app/modules/player/domain/usecases/delete_contents.dart';
 import 'package:saudetv/app/modules/player/domain/usecases/get_contents.dart';
@@ -37,11 +42,14 @@ import 'package:saudetv/app/modules/player/domain/usecases/save_video.dart';
 import 'package:saudetv/app/modules/player/domain/usecases/update_terminal.dart';
 import 'package:saudetv/app/modules/player/external/datasources/contents_local_datasource.dart';
 import 'package:saudetv/app/modules/player/external/datasources/contents_remote_datasource.dart';
+import 'package:saudetv/app/modules/player/external/datasources/video_remote_datasource.dart';
 import 'package:saudetv/app/modules/player/external/datasources/weather_remote_datasource.dart';
 import 'package:saudetv/app/modules/player/infra/datasources/contents_local_datasource_i.dart';
 import 'package:saudetv/app/modules/player/infra/datasources/contents_remote_datasource_i.dart';
+import 'package:saudetv/app/modules/player/infra/datasources/video_remote_datasource_i.dart';
 import 'package:saudetv/app/modules/player/infra/datasources/weather_remote_datasource_i.dart';
 import 'package:saudetv/app/modules/player/infra/repositories/contents_repository.dart';
+import 'package:saudetv/app/modules/player/infra/repositories/video_repository.dart';
 import 'package:saudetv/app/modules/player/infra/repositories/weather_repository.dart';
 import 'package:saudetv/app/modules/player/presenter/stores/player_store.dart';
 import 'package:saudetv/app/services/check_internet/check_internet_interface.dart';
@@ -53,6 +61,7 @@ import 'package:saudetv/app/services/get_path/path_provider_service.dart';
 import 'package:saudetv/app/services/local_storage/local_storage_interface.dart';
 import 'package:saudetv/app/services/local_storage/shared_preferences_service.dart';
 import 'package:saudetv/app/core/presenter/pages/page.dart';
+import 'package:saudetv/app/types/aws_signature.dart';
 
 void main() {
   runApp(const MyApp());
@@ -64,6 +73,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const String baseUrl = 'http://api.saudetvpainel.com.br/api';
+    const String awsUrl = 'https://saude-tv.s3.amazonaws.com';
     const String weatherUrl = 'https://api.openweathermap.org/data/2.5/weather';
     const String weatherToken =
         '<tirar_esta_parte>a964d0a1f5ddd3285f0d9f124018af1f';
@@ -83,6 +93,7 @@ class MyApp extends StatelessWidget {
               create: (context) => ConnectivityPlusService()),
           Provider<GetPathInterface>(
               create: (context) => PathProviderService()),
+          Provider<AWSSignature>(create: (context) => AWSSignature()),
           //DataSources
           Provider<IWeatherRemoteDataSource>(
               create: (context) => WeatherRemoteDataSource(
@@ -117,6 +128,18 @@ class MyApp extends StatelessWidget {
                     baseURL: baseUrl,
                     clientHttp: context.read(),
                   )),
+          Provider<IVideoRemoteDataSource>(
+              create: (context) => VideoRemoteDataSource(
+                    baseURL: awsUrl,
+                    clientHttp: context.read(),
+                    signature: context.read(),
+                  )),
+          Provider<DateUTCRemoteDataSource1>(
+              create: (context) =>
+                  DateUTCRemoteDataSource1(clientHttp: context.read())),
+          Provider<DateUTCRemoteDataSource2>(
+              create: (context) =>
+                  DateUTCRemoteDataSource2(clientHttp: context.read())),
           //Repositories
           Provider<IWeatherRepository>(
               create: (context) => WeatherRepository(
@@ -137,6 +160,13 @@ class MyApp extends StatelessWidget {
                     localDataSource: context.read(),
                     remoteDataSource: context.read(),
                   )),
+          Provider<IVideoRepository>(
+              create: (context) =>
+                  VideoRepository(remoteDataSource: context.read())),
+          Provider<IDateUTCRepository>(
+              create: (context) => DateUTCRepository(
+                  remoteDataSource1: context.read(),
+                  remoteDataSource2: context.read())),
           //Usecases
           Provider<IInternetIsConnected>(
               create: (context) => InternetIsConnected(
@@ -158,6 +188,7 @@ class MyApp extends StatelessWidget {
               create: (context) => SaveVideo(
                     videoPath: videoPath,
                     getPath: context.read(),
+                    repository: context.read(),
                   )),
           Provider<ISaveLogo>(
               create: (context) => SaveLogo(
@@ -199,6 +230,9 @@ class MyApp extends StatelessWidget {
                     getUser: context.read(),
                     readUser: context.read(),
                   )),
+          Provider<IGetDateUTC>(
+            create: (context) => GetDateUTC(repository: context.read()),
+          ),
           Provider<IUpdateTerminal>(
               create: (context) => UpdateTerminal(
                     getUser: context.read(),
@@ -219,6 +253,7 @@ class MyApp extends StatelessWidget {
           Provider<PageStore>(
               create: (context) => PageStore(
                     isConnected: context.read(),
+                    getDateUTC: context.read(),
                   )),
           Provider<SplashStore>(
               create: (context) => SplashStore(
@@ -235,7 +270,6 @@ class MyApp extends StatelessWidget {
           Provider<PlayerStore>(
               create: (context) => PlayerStore(
                     getContents: context.read(),
-                    getWeather: context.read(),
                     updateTerminal: context.read(),
                     deleteContents: context.read(),
                     pageStore: context.read(),

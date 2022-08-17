@@ -1,5 +1,6 @@
 abstract class ClientHttpInterface {
   Future<BaseResponse> get(String path);
+  Future<BaseResponse> download(String path, String savePath);
   Future<BaseResponse> post(String path, {Map<String, dynamic>? data});
   Future<BaseResponse> put(String path, {Map<String, dynamic>? data});
   Future<BaseResponse> upload(String path, {List<int>? data});
