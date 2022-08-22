@@ -62,9 +62,17 @@ import 'package:saudetv/app/services/local_storage/local_storage_interface.dart'
 import 'package:saudetv/app/services/local_storage/shared_preferences_service.dart';
 import 'package:saudetv/app/core/presenter/pages/page.dart';
 import 'package:saudetv/app/types/aws_signature.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
-void main() {
-  runApp(const MyApp());
+Future<void> main() async {
+  await SentryFlutter.init(
+    (options) {
+      options.dsn =
+          'https://5a052cdb7c34455f8ac8f99b8b259d5f@o1367830.ingest.sentry.io/6668895';
+      options.tracesSampleRate = 1.0;
+    },
+    appRunner: () => runApp(const MyApp()),
+  );
 }
 
 class MyApp extends StatelessWidget {

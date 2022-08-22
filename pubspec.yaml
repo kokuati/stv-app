@@ -25,6 +25,7 @@ dependencies:
   video_player: ^2.4.0
   crypto: ^3.0.2
   hex: ^0.2.0
+  sentry_flutter: ^6.9.1
 
 dev_dependencies:
   build_runner:

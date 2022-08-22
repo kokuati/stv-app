@@ -40,18 +40,16 @@ class PlayerStore {
     _loginSource = loginSource;
   }
 
-  Future<void> _setContentsPage(ContentsEntity contentsEntity) async {
+  void _setContentsPage(ContentsEntity contentsEntity) async {
     if (contentsEntity.type == Type.video) {
       pageStore.page.value = Container(color: Colors.black);
-      await Future.delayed(const Duration(milliseconds: 200));
+      await Future.delayed(const Duration(milliseconds: 100));
       pageStore.page.value = VideoPage(
         contentsEntity: contentsEntity,
       );
     } else if (contentsEntity.type == Type.rss) {
-      pageStore.page.value = Container(color: Colors.black);
       if (TimeCuston()
           .isSameDay(pageStore.dateUTC, contentsEntity.updateData)) {
-        await Future.delayed(const Duration(milliseconds: 200));
         pageStore.page.value = RssPage(
           contentsEntity: contentsEntity,
         );
@@ -59,8 +57,6 @@ class PlayerStore {
         nextContents();
       }
     } else {
-      pageStore.page.value = Container(color: Colors.black);
-      await Future.delayed(const Duration(milliseconds: 200));
       pageStore.page.value = OthersPage(
         contentsEntity: contentsEntity,
       );
@@ -69,12 +65,12 @@ class PlayerStore {
 
   Future<void> nextContents() async {
     final int numberOfContents = _contentsList.length;
-    if ((numberOfContents - 1) == _contentsIndex) {
-      _contentsIndex = 0;
-    } else {
+    if ((numberOfContents - 1) > _contentsIndex) {
       _contentsIndex++;
+    } else {
+      _contentsIndex = 0;
     }
-    await _setContentsPage(_contentsList[_contentsIndex]);
+    _setContentsPage(_contentsList[_contentsIndex]);
   }
 
   Future<void> initialize(LoginSource loginSource) async {
@@ -160,9 +156,17 @@ class PlayerStore {
   Future<void> _delContents() async {
     if (!_isUpdate && !_isDelete) {
       _isDelete = true;
+      List deletedContent = [];
       for (var contents in _deleteContentsList) {
         if (await deleteContents(contents)) {
-          _deleteContentsList.remove(contents);
+          deletedContent.add(contents);
+        }
+      }
+      if (deletedContent.length == _deleteContentsList.length) {
+        _deleteContentsList.clear();
+      } else {
+        for (var element in deletedContent) {
+          _deleteContentsList.remove(element);
         }
       }
       _isDelete = false;
