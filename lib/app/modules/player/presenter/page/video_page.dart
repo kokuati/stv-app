@@ -51,9 +51,8 @@ class VideoPageState extends State<VideoPage> {
       width: width,
       child: controller.value.isInitialized
           ? Container(alignment: Alignment.topCenter, child: buildVideoPlayer())
-          : const SizedBox(
-              height: 200,
-              child: Center(child: CircularProgressIndicator()),
+          : Container(
+              color: Colors.black,
             ),
     );
   }
