@@ -14,15 +14,12 @@ class UserModel implements UserEntity {
   final String terminal;
   @override
   final String token;
-  @override
-  final String logo;
   UserModel({
     required this.user,
     required this.password,
     required this.terminalList,
     required this.terminal,
     required this.token,
-    required this.logo,
   });
 
   Map<String, dynamic> toMap() {
@@ -32,7 +29,6 @@ class UserModel implements UserEntity {
       'terminalList': terminalList,
       'terminal': terminal,
       'token': token,
-      'logo': logo,
     };
   }
 
@@ -43,7 +39,6 @@ class UserModel implements UserEntity {
       terminalList: List<String>.from(map['terminalList']),
       terminal: map['terminal'] ?? '',
       token: map['token'] ?? '',
-      logo: map['logo'] ?? '',
     );
   }
 

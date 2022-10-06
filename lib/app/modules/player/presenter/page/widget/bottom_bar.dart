@@ -8,14 +8,12 @@ class BottonBar extends StatelessWidget {
   final Function getSystemWeek;
   final Function getSystemDay;
   final ValueNotifier<WeatherEntity> weatherEntity;
-  final String logo;
   const BottonBar({
     Key? key,
     required this.getSystemTime,
     required this.getSystemWeek,
     required this.getSystemDay,
     required this.weatherEntity,
-    required this.logo,
   }) : super(key: key);
 
   @override
@@ -127,10 +125,6 @@ class BottonBar extends StatelessWidget {
                     : const SizedBox();
               }),
           const Expanded(child: SizedBox()),
-          Image.file(
-            File(logo),
-            height: heightScreen * 0.09,
-          ),
           SizedBox(
             width: (widthScreen * 0.03),
           ),

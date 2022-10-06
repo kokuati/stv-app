@@ -19,8 +19,8 @@ class UserRemoteDataSource extends IUserRemoteDataSource {
     clientHttp.setReceiveTimeout(50000);
 
     try {
-      final response = await clientHttp
-          .post('/auth', data: {"email": email, "password": password});
+      final response = await clientHttp.post('/auth',
+          data: {"email": email, "password": password, "terminal": terminal});
       final Map data = response.data["data"];
       final List<String> terminalList = [];
       for (var item in data["customer"]["terminals"]) {
@@ -33,8 +33,7 @@ class UserRemoteDataSource extends IUserRemoteDataSource {
         password: password,
         terminalList: terminalList,
         terminal: terminal,
-        token: data["auth"]["token"],
-        logo: data["customer"]["logo"],
+        token: data["auth"]["clientToken"],
       );
       return model;
     } on DioError catch (e) {

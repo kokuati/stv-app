@@ -1,4 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:saudetv/app/core/domain/entities/user_entity.dart';
 import 'package:saudetv/app/core/domain/repositories/user_repository_i.dart';
 import 'package:saudetv/app/core/errors/errors.dart';
@@ -34,7 +33,6 @@ class UserRepository extends IUserRepository {
       terminalList: entity.terminalList,
       terminal: entity.terminal,
       token: entity.token,
-      logo: entity.logo,
     );
     try {
       final result = await localDataSource.saveUser(model);

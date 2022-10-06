@@ -10,7 +10,6 @@ import 'package:saudetv/app/core/domain/usecases/get_terminal.dart';
 import 'package:saudetv/app/core/domain/usecases/internet_is_connected.dart';
 import 'package:saudetv/app/core/domain/usecases/read_terminal.dart';
 import 'package:saudetv/app/core/domain/usecases/read_user.dart';
-import 'package:saudetv/app/core/domain/usecases/save_logo.dart';
 import 'package:saudetv/app/core/domain/usecases/save_terminal.dart';
 import 'package:saudetv/app/core/domain/usecases/save_user.dart';
 import 'package:saudetv/app/core/external/datasources/date_utc_remote_datasource.dart';
@@ -198,10 +197,6 @@ class MyApp extends StatelessWidget {
                     getPath: context.read(),
                     repository: context.read(),
                   )),
-          Provider<ISaveLogo>(
-              create: (context) => SaveLogo(
-                    getPath: context.read(),
-                  )),
           Provider<IReadUser>(
               create: (context) => ReadUser(
                     repository: context.read(),
@@ -218,7 +213,6 @@ class MyApp extends StatelessWidget {
               create: (context) => GetUser(
                     repository: context.read(),
                     saveUser: context.read(),
-                    saveLogo: context.read(),
                   )),
           Provider<IGetWeather>(
               create: (context) => GetWeather(

@@ -38,9 +38,12 @@ class _OthersPageState extends State<OthersPage> {
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
-      height: 200,
-      child: Center(child: CircularProgressIndicator()),
+    double height = MediaQuery.of(context).size.height;
+    double width = MediaQuery.of(context).size.width;
+    return Container(
+      width: width,
+      height: height,
+      color: Colors.black,
     );
   }
 }
