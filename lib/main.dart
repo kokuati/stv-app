@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:saudetv/app/core/domain/repositories/core_repository_i.dart';
 import 'package:saudetv/app/core/domain/repositories/date_utc_repository_i.dart';
 import 'package:saudetv/app/core/domain/repositories/terminal_repository_i.dart';
 import 'package:saudetv/app/core/domain/repositories/user_repository_i.dart';
@@ -20,6 +21,7 @@ import 'package:saudetv/app/core/infra/datasources/terminal_local_datasource_i.d
 import 'package:saudetv/app/core/infra/datasources/terminal_remote_datasource_i.dart';
 import 'package:saudetv/app/core/infra/datasources/user_local_datasource_i.dart';
 import 'package:saudetv/app/core/infra/datasources/user_remote_datasource_i.dart';
+import 'package:saudetv/app/core/infra/repositories/core_repository.dart';
 import 'package:saudetv/app/core/infra/repositories/date_utc_repository.dart';
 import 'package:saudetv/app/core/infra/repositories/terminal_repository.dart';
 import 'package:saudetv/app/core/infra/repositories/user_repository.dart';
@@ -62,6 +64,12 @@ import 'package:saudetv/app/services/local_storage/shared_preferences_service.da
 import 'package:saudetv/app/core/presenter/pages/page.dart';
 import 'package:saudetv/app/types/aws_signature.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+
+import 'app/core/domain/usecases/logout.dart';
+import 'app/core/external/datasources/core_local_datasource.dart';
+import 'app/core/infra/datasources/core_local_datasource_i.dart';
+import 'app/core/presenter/pages/config_page.dart';
+import 'app/modules/auth/presenter/page/login_page.dart';
 
 Future<void> main() async {
   await SentryFlutter.init(
@@ -147,6 +155,10 @@ class MyApp extends StatelessWidget {
           Provider<DateUTCRemoteDataSource2>(
               create: (context) =>
                   DateUTCRemoteDataSource2(clientHttp: context.read())),
+          Provider<ICoreLocalDataSource>(
+              create: (context) =>
+                  CoreLocalDataSource(localStorage: context.read())),
+
           //Repositories
           Provider<IWeatherRepository>(
               create: (context) => WeatherRepository(
@@ -174,6 +186,9 @@ class MyApp extends StatelessWidget {
               create: (context) => DateUTCRepository(
                   remoteDataSource1: context.read(),
                   remoteDataSource2: context.read())),
+          Provider<ICoreRepository>(
+              create: (context) =>
+                  CoreRepository(coreLocalDataSource: context.read())),
           //Usecases
           Provider<IInternetIsConnected>(
               create: (context) => InternetIsConnected(
@@ -251,6 +266,12 @@ class MyApp extends StatelessWidget {
                     getUser: context.read(),
                     getTerminal: context.read(),
                   )),
+          Provider<ILogoutUserCase>(
+              create: (context) => LogoutUserCase(
+                    coreRepository: context.read(),
+                    getPath: context.read(),
+                    videoPath: videoPath,
+                  )),
           //Stores
           Provider<PageStore>(
               create: (context) => PageStore(
@@ -263,11 +284,13 @@ class MyApp extends StatelessWidget {
                     readUser: context.read(),
                     readTerminal: context.read(),
                     getUser: context.read(),
+                    logoutUserCase: context.read(),
                   )),
           Provider<LoginStore>(
               create: (context) => LoginStore(
                     loginUsecase: context.read(),
                     pageStore: context.read(),
+                    splashStore: context.read(),
                   )),
           Provider<PlayerStore>(
               create: (context) => PlayerStore(
@@ -282,7 +305,13 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             primarySwatch: Colors.blue,
           ),
-          home: const Pages(),
+          //home: const Pages(),
+          initialRoute: '/',
+          routes: {
+            '/': (context) => const ConfigPage(),
+            '/page': (context) => const Pages(),
+            '/login': (context) => const LoginPage(),
+          },
         ),
       ),
     );

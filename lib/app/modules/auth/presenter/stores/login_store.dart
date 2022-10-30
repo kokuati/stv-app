@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
+
 import 'package:saudetv/app/core/presenter/stores/page_store.dart';
+import 'package:saudetv/app/core/presenter/stores/splash_store.dart';
 import 'package:saudetv/app/modules/auth/domain/usecases/login.dart';
 import 'package:saudetv/app/modules/player/presenter/page/player_page.dart';
 
 class LoginStore {
   final ILogin loginUsecase;
   final PageStore pageStore;
+  final SplashStore splashStore;
 
   LoginStore({
     required this.loginUsecase,
     required this.pageStore,
+    required this.splashStore,
   });
 
   String _email = '';
@@ -17,6 +21,7 @@ class LoginStore {
   String _terminal = '';
   String _erroMS = '';
   ValueNotifier<bool> islogged = ValueNotifier(false);
+  ValueNotifier<int> textfield = ValueNotifier(0);
 
   String get email => _email;
   String get password => _password;
@@ -50,6 +55,7 @@ class LoginStore {
         setErroMS(error.message);
       }, (loginSource) {
         pageStore.page.value = PlayerPage(loginSource: loginSource);
+        splashStore.pageState.value = 'primeira';
       });
     } else {
       pageStore.isConnect

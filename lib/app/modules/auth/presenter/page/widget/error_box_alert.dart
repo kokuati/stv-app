@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
 
 class ErrorBoxAlert extends StatelessWidget {
-  final double heightScreen;
-  final double widthScreen;
   final String errorMessage;
   const ErrorBoxAlert({
     Key? key,
-    required this.heightScreen,
-    required this.widthScreen,
     required this.errorMessage,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    double height = MediaQuery.of(context).size.height;
     return SizedBox(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -20,8 +17,8 @@ class ErrorBoxAlert extends StatelessWidget {
         children: [
           Icon(
             Icons.key_off,
-            color: const Color.fromARGB(255, 89, 0, 0),
-            size: heightScreen * 0.035,
+            color: Colors.red[800],
+            size: height * 0.035,
           ),
           const SizedBox(
             width: 15,
@@ -30,8 +27,9 @@ class ErrorBoxAlert extends StatelessWidget {
             errorMessage,
             style: TextStyle(
               inherit: false,
-              color: const Color.fromARGB(255, 89, 0, 0),
-              fontSize: heightScreen * 0.022,
+              fontWeight: FontWeight.w600,
+              color: Colors.red[800],
+              fontSize: height * 0.025,
               fontFamily: 'Segoe',
             ),
           )
