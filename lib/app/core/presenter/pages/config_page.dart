@@ -128,17 +128,17 @@ class _ConfigPageState extends State<ConfigPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Icon(
-                        Icons.logout,
+                      Icon(
+                        pageState == 'login' ? Icons.login : Icons.logout,
                         color: Colors.white,
                       ),
                       SizedBox(
                         height: height * 0.005,
                       ),
-                      const Text(
-                        'LOGOUT',
+                      Text(
+                        pageState == 'login' ? 'LOGIN' : 'LOGOUT',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: const TextStyle(
                           inherit: false,
                           color: Color.fromARGB(255, 255, 255, 255),
                           fontSize: 8,
