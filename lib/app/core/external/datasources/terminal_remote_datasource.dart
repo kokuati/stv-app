@@ -24,7 +24,7 @@ class TerminalRemoteDataSource extends ITerminalRemoteDataSource {
       final List<String> contentsList = [];
       final int courseMin =
           ((int.parse(data["data"]["refreshTime"])) / 60).round();
-      for (var item in data["data"]["playlists"][0]["contents"]) {
+      for (var item in data["data"]["contents"]) {
         contentsList.add(item);
       }
       final TerminalModel model = TerminalModel(
