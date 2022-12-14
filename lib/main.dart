@@ -88,7 +88,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const String baseUrl = 'http://dev.api.saudetvpainel.com.br:3000';
-    const String awsUrl = 'https://saude-tv.s3.amazonaws.com';
+    const String awsUrl = 'https://saude-tv-development.s3.amazonaws.com';
     const String weatherUrl = 'https://api.openweathermap.org/data/2.5/weather';
     const String weatherToken =
         '<tirar_esta_parte>a964d0a1f5ddd3285f0d9f124018af1f';
