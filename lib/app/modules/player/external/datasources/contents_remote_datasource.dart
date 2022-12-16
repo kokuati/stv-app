@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:saudetv/app/modules/player/domain/entities/contents_entity.dart';
 import 'package:saudetv/app/modules/player/infra/datasources/contents_remote_datasource_i.dart';
@@ -14,10 +16,8 @@ class ContentsRemoteDataSource extends IContentsRemoteDataSource {
   @override
   Future<ContentsModel> getContents(String contentsID, String token) async {
     clientHttp.setBaseUrl(baseURL);
-    clientHttp.setConnectTimeout(60000 * 1);
-    clientHttp.setReceiveTimeout(60000 * 1);
     clientHttp.setHeaders({'Authorization': "Bearer $token"});
-
+    log('inicio conteudo - $contentsID');
     try {
       final response = await clientHttp.get("/v1/contents/$contentsID");
       final data = response.data;
@@ -28,6 +28,7 @@ class ContentsRemoteDataSource extends IContentsRemoteDataSource {
       } else if (contentsType == Type.rss) {
         contentsInfo = data["data"];
       }
+      log('conteudo - contentsInfo: $contentsInfo');
       final ContentsModel model = ContentsModel(
         id: contentsID,
         type: contentsType,
@@ -36,8 +37,10 @@ class ContentsRemoteDataSource extends IContentsRemoteDataSource {
       );
       return model;
     } on DioError catch (e) {
+      log('conteudo - erro: ${e.response!.statusCode!}');
       throw e.response!.statusCode!;
     } catch (e) {
+      log('conteudo - erro: $e');
       throw 0;
     }
   }

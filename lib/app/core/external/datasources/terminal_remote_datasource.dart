@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:saudetv/app/core/infra/datasources/terminal_remote_datasource_i.dart';
 import 'package:saudetv/app/core/infra/models/terminal_model.dart';
@@ -14,19 +16,21 @@ class TerminalRemoteDataSource extends ITerminalRemoteDataSource {
   @override
   Future<TerminalModel> getTerminal(String terminalID, String token) async {
     clientHttp.setBaseUrl(baseURL);
-    clientHttp.setConnectTimeout(500000);
-    clientHttp.setReceiveTimeout(500000);
+    //clientHttp.setConnectTimeout(500);
+    //clientHttp.setReceiveTimeout(500);
     clientHttp.setHeaders({'Authorization': "Bearer $token"});
-
+    log('inicio terminal - $terminalID');
     try {
       final response = await clientHttp.get("/v1/terminals/$terminalID");
       final data = response.data;
+      log('terminal - data: $data');
       final List<String> contentsList = [];
       final int courseMin =
           ((int.parse(data["data"]["refreshTime"])) / 60).round();
       for (var item in data["data"]["contents"]) {
         contentsList.add(item);
       }
+      log('terminal - Lista de conteudo $contentsList');
       final TerminalModel model = TerminalModel(
         id: terminalID,
         contentsList: contentsList,
@@ -41,8 +45,10 @@ class TerminalRemoteDataSource extends ITerminalRemoteDataSource {
       );
       return model;
     } on DioError catch (e) {
+      log('terminal - erro: ${e.response!.statusCode!}');
       throw e.response!.statusCode!;
     } catch (e) {
+      log('terminal - erro: $e');
       throw 0;
     }
   }

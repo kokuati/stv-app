@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -33,6 +34,7 @@ class VideoPageState extends State<VideoPage> {
         playerStore.nextContents();
       }
     });
+    log('video passando - ${widget.contentsEntity.id}');
     super.initState();
   }
 
