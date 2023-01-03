@@ -16,8 +16,6 @@ class TerminalRemoteDataSource extends ITerminalRemoteDataSource {
   @override
   Future<TerminalModel> getTerminal(String terminalID, String token) async {
     clientHttp.setBaseUrl(baseURL);
-    //clientHttp.setConnectTimeout(500);
-    //clientHttp.setReceiveTimeout(500);
     clientHttp.setHeaders({'Authorization': "Bearer $token"});
     log('inicio terminal - $terminalID');
     try {
