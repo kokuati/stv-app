@@ -29,4 +29,18 @@ class VideoRepository extends IVideoRepository {
       }
     }
   }
+
+  @override
+  Future<Either<HttpError, bool>> getVideo2(
+      String videoID, String videoPath) async {
+    try {
+      return right(await remoteDataSource.getVideo2(videoID, videoPath));
+    } catch (e) {
+      if (e is int) {
+        return left(HttpError(statusCode: e));
+      } else {
+        return left(HttpError(statusCode: 0));
+      }
+    }
+  }
 }

@@ -57,3 +57,44 @@ class SaveVideo extends ISaveVideo {
     }
   }
 }
+
+class SaveVideo2 extends ISaveVideo {
+  String videoPath;
+  GetPathInterface getPath;
+  IVideoRepository repository;
+  SaveVideo2({
+    required this.videoPath,
+    required this.getPath,
+    required this.repository,
+  });
+
+  @override
+  Future<Either<Errors, ContentsModel>> call(
+      ContentsModel model, DateTime dateUTC) async {
+    try {
+      final Directory appDocDir = await getPath.getAppDocumentsDirectory();
+      final Directory videoDir = Directory('${appDocDir.path}/$videoPath');
+      final bool videoPathExist = await videoDir.exists();
+      if (!videoPathExist) {
+        await videoDir.create();
+      }
+      final savePath = "${videoDir.path}/${model.id}.mp4";
+      final wasDowload = await repository.getVideo2(model.id, savePath);
+      return wasDowload.fold((l) {
+        return left(Empty(message: 'Não foi possivel salvar o video'));
+      }, (r) {
+        if (r) {
+          return right(ContentsModel(
+              id: model.id,
+              type: model.type,
+              contents: savePath,
+              updateData: model.updateData));
+        } else {
+          return left(Empty(message: 'Não foi possivel salvar o video'));
+        }
+      });
+    } catch (e) {
+      return left(Empty(message: 'Não foi possivel salvar o video'));
+    }
+  }
+}

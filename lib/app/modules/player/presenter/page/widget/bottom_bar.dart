@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:saudetv/app/modules/player/domain/entities/weather_entity.dart';
 import 'package:timer_builder/timer_builder.dart';

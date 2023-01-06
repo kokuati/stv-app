@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:saudetv/app/core/infra/datasources/user_remote_datasource_i.dart';
 import 'package:saudetv/app/core/infra/models/user_model.dart';
@@ -16,8 +18,8 @@ class UserRemoteDataSource extends IUserRemoteDataSource {
       String email, String password, String terminal) async {
     clientHttp.setBaseUrl(baseURL);
     try {
-      final response = await clientHttp.post('/auth',
-          data: {"email": email, "password": password, "terminal": terminal});
+      final response = await clientHttp
+          .post('/auth', data: {"email": email, "password": password});
       final Map data = response.data["data"];
       final List<String> terminalList = [];
       for (var item in data["customer"]["terminals"]) {
@@ -34,8 +36,10 @@ class UserRemoteDataSource extends IUserRemoteDataSource {
       );
       return model;
     } on DioError catch (e) {
+      log(e.toString());
       throw e.response!.statusCode!;
     } catch (e) {
+      log(e.toString());
       throw 0;
     }
   }
