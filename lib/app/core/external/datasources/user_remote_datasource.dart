@@ -17,9 +17,6 @@ class UserRemoteDataSource extends IUserRemoteDataSource {
   Future<UserModel> getUser(
       String email, String password, String terminal) async {
     clientHttp.setBaseUrl(baseURL);
-    clientHttp.setConnectTimeout(50000);
-    clientHttp.setReceiveTimeout(50000);
-
     try {
       final response = await clientHttp
           .post('/auth', data: {"email": email, "password": password});
