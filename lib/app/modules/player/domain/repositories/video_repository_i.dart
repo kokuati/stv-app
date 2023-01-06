@@ -10,4 +10,8 @@ abstract class IVideoRepository {
       String secretKey,
       String videoPath,
       DateTime dateUTC);
+  Future<Either<HttpError, bool>> getVideo2(
+    String videoID,
+    String videoPath,
+  );
 }

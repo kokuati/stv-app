@@ -207,7 +207,7 @@ class MyApp extends StatelessWidget {
                     repository: context.read(),
                   )),
           Provider<ISaveVideo>(
-              create: (context) => SaveVideo(
+              create: (context) => SaveVideo2(
                     videoPath: videoPath,
                     getPath: context.read(),
                     repository: context.read(),

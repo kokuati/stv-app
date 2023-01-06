@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:saudetv/app/core/infra/datasources/terminal_remote_datasource_i.dart';
 import 'package:saudetv/app/core/infra/models/terminal_model.dart';
@@ -17,7 +19,6 @@ class TerminalRemoteDataSource extends ITerminalRemoteDataSource {
     clientHttp.setConnectTimeout(500000);
     clientHttp.setReceiveTimeout(500000);
     clientHttp.setHeaders({'Authorization': "Bearer $token"});
-
     try {
       final response = await clientHttp.get("/v1/terminals/$terminalID");
       final data = response.data;
@@ -41,8 +42,10 @@ class TerminalRemoteDataSource extends ITerminalRemoteDataSource {
       );
       return model;
     } on DioError catch (e) {
+      log(e.toString());
       throw e.response!.statusCode!;
     } catch (e) {
+      log(e.toString());
       throw 0;
     }
   }

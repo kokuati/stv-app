@@ -44,4 +44,24 @@ class VideoRemoteDataSource extends IVideoRemoteDataSource {
       throw 0;
     }
   }
+
+  @override
+  Future<bool> getVideo2(String videoID, String videoPath) async {
+    clientHttp.setBaseUrl(
+        'https://d2pq3l6f7cd6kz.cloudfront.net/contents/62beec1d8c2d825eafa5edf3/');
+    clientHttp.setConnectTimeout((60000 * 100));
+    clientHttp.setReceiveTimeout((60000 * 100));
+    try {
+      final response = await clientHttp.download('$videoID.mp4', videoPath);
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        return false;
+      }
+    } on DioError catch (e) {
+      throw e.response!.statusCode!;
+    } catch (e) {
+      throw 0;
+    }
+  }
 }
